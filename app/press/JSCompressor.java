@@ -24,8 +24,8 @@ public class JSCompressor extends Compressor {
                 " -->", PluginConfig.js.srcDir, PluginConfig.js.compressedDir);
     }
 
-    public String compressedSingleFileUrl(String fileName) {
-        return compressedSingleFileUrl(jsFileCompressor, fileName);
+    public String compressedSingleFileUrl(String fileName, boolean render) {
+        return compressedSingleFileUrl(jsFileCompressor, fileName, render);
     }
 
     public static CompressedFile getCompressedFile(String key) {

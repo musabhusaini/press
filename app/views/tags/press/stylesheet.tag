@@ -4,6 +4,8 @@
  *  - media (optional)      media : screen, print, aural, projection ...
  *  - compress (optional)   if set to false, file is added to compressed output,
  *                          but is not itself compressed
+ *  - render (optional)     if the file should be processed with the template-
+                            renderer
  *
  *  When the plugin is enabled, outputs a comment and adds the css file to the
  *  list of files to be compressed.
@@ -31,9 +33,13 @@
       _compress = true;
     }
     
+    if(_render == null) {
+      _render = false;
+    }
+    
     if(! _src) {
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for stylesheet tag");
     }
 
 }%
-${ press.Plugin.addCSS(_src, _compress) }
+${ press.Plugin.addCSS(_src, _compress, _render) }

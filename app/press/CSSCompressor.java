@@ -20,8 +20,8 @@ public class CSSCompressor extends Compressor {
                 " -->", PluginConfig.css.srcDir, PluginConfig.css.compressedDir);
     }
 
-    public String compressedSingleFileUrl(String fileName) {
-        return compressedSingleFileUrl(cssFileCompressor, fileName);
+    public String compressedSingleFileUrl(String fileName, boolean render) {
+        return compressedSingleFileUrl(cssFileCompressor, fileName, render);
     }
 
     public static CompressedFile getCompressedFile(String key) {

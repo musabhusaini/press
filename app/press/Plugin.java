@@ -39,12 +39,12 @@ public class Plugin extends PlayPlugin {
     /**
      * Add a single JS file to compression
      */
-    public static String addSingleJS(String fileName) {
+    public static String addSingleJS(String fileName, boolean render) {
         checkJSFileExists(fileName);
         JSCompressor compressor = jsCompressor.get();
         String src = null;
         if (performCompression()) {
-            String requestKey = compressor.compressedSingleFileUrl(fileName);
+            String requestKey = compressor.compressedSingleFileUrl(fileName, render);
             if (PluginConfig.isInMemoryStorage()) {
                 src = getSingleCompressedJSUrl(requestKey);
             } else {
@@ -60,12 +60,12 @@ public class Plugin extends PlayPlugin {
     /**
      * Add a single CSS file to compression
      */
-    public static String addSingleCSS(String fileName) {
+    public static String addSingleCSS(String fileName, boolean render) {
         checkCSSFileExists(fileName);
         CSSCompressor compressor = cssCompressor.get();
         String src = null;
         if (performCompression()) {
-            String requestKey = compressor.compressedSingleFileUrl(fileName);
+            String requestKey = compressor.compressedSingleFileUrl(fileName, render);
             if (PluginConfig.isInMemoryStorage()) {
                 src = getSingleCompressedCSSUrl(requestKey);
             } else {
@@ -82,7 +82,7 @@ public class Plugin extends PlayPlugin {
      * Adds the given source file(s) to the JS compressor, returning the file
      * signature to be output in HTML
      */
-    public static String addJS(String src, boolean compress) {
+    public static String addJS(String src, boolean compress, boolean render) {
         JSCompressor compressor = jsCompressor.get();
         String baseUrl = compressor.srcDir;
         String result = "";
@@ -90,7 +90,7 @@ public class Plugin extends PlayPlugin {
             checkForJSDuplicates(fileName);
 
             if (performCompression()) {
-                result += compressor.add(fileName, compress) + "\n";
+                result += compressor.add(fileName, compress, render) + "\n";
             } else {
                 result += getScriptTag(baseUrl + fileName);
             }
@@ -103,7 +103,7 @@ public class Plugin extends PlayPlugin {
      * Adds the given source file(s) to the CSS compressor, returning the file
      * signature to be output in HTML
      */
-    public static String addCSS(String src, boolean compress) {
+    public static String addCSS(String src, boolean compress, boolean render) {
         CSSCompressor compressor = cssCompressor.get();
         String baseUrl = compressor.srcDir;
         String result = "";
@@ -111,7 +111,7 @@ public class Plugin extends PlayPlugin {
             checkForCSSDuplicates(fileName);
 
             if (performCompression()) {
-                result += compressor.add(fileName, compress) + "\n";
+                result += compressor.add(fileName, compress, render) + "\n";
             } else {
                 result += getLinkTag(baseUrl + fileName);
             }

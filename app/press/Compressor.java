@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+
 import play.PlayPlugin;
 import play.cache.Cache;
 import play.exceptions.UnexpectedException;
@@ -25,6 +28,7 @@ import play.libs.Crypto;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.templates.JavaExtensions;
+import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 import press.io.CompressedFile;
 import press.io.FileIO;
@@ -94,7 +98,7 @@ public abstract class Compressor extends PlayPlugin {
      * have the same name as the original file with .min appended before the
      * extension. eg the compressed output of widget.js will be in widget.min.js
      */
-    public String compressedSingleFileUrl(FileCompressor compressor, String fileName) {
+    public String compressedSingleFileUrl(FileCompressor compressor, String fileName, boolean render) {
         PressLogger.trace("Request to compress single file %s", fileName);
 
         int lastDot = fileName.lastIndexOf('.');
@@ -105,7 +109,7 @@ public abstract class Compressor extends PlayPlugin {
         // of files, the list just has a single entry
         VirtualFile srcFile = checkFileExists(fileName);
         List<FileInfo> componentFiles = new ArrayList<FileInfo>(1);
-        componentFiles.add(new FileInfo(compressedFileName, true, srcFile));
+        componentFiles.add(new FileInfo(compressedFileName, true, srcFile, render));
 
         // Check whether the compressed file needs to be generated
         String outputFilePath = compressedDir + compressedFileName;
@@ -130,7 +134,7 @@ public abstract class Compressor extends PlayPlugin {
      * 
      * @return the file request signature to be output in the HTML
      */
-    public String add(String fileName, boolean compress) {
+    public String add(String fileName, boolean compress, boolean render) {
         if (compress) {
             PressLogger.trace("Adding %s to output", fileName);
         } else {
@@ -142,7 +146,7 @@ public abstract class Compressor extends PlayPlugin {
         }
 
         // Add the file to the list of files to be compressed
-        fileInfos.put(fileName, new FileInfo(fileName, compress, checkFileExists(fileName)));
+        fileInfos.put(fileName, new FileInfo(fileName, compress, checkFileExists(fileName), render));
 
         return getFileRequestSignature(fileName);
     }
@@ -267,7 +271,7 @@ public abstract class Compressor extends PlayPlugin {
                 throw new PressException(msg);
             }
 
-            newList.add(new FileInfo(fileInfo.fileName, fileInfo.compress, file));
+            newList.add(new FileInfo(fileInfo.fileName, fileInfo.compress, file, fileInfo.render));
         }
 
         // Add a mapping between the request key and the list of files that
@@ -400,6 +404,11 @@ public abstract class Compressor extends PlayPlugin {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
                 fileInfo.file), "UTF-8"));
 
+        // render the file if it should be rendered
+        if (fileInfo.render) {
+        	String rendered = TemplateLoader.loadString(IOUtils.toString(in)).render();
+        	in = new BufferedReader(new StringReader(rendered));
+        }
         // If the file should be compressed
         if (fileInfo.compress) {
             // Invoke the compressor
@@ -460,11 +469,13 @@ public abstract class Compressor extends PlayPlugin {
         String fileName;
         boolean compress;
         private File file;
+        boolean render;
 
-        public FileInfo(String fileName, boolean compress, VirtualFile file) {
+        public FileInfo(String fileName, boolean compress, VirtualFile file, boolean render) {
             this.fileName = fileName;
             this.compress = compress;
             this.file = file == null ? null : file.getRealFile();
+            this.render = render;
         }
 
         public long getLastModified() {

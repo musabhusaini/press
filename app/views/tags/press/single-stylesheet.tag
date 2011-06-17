@@ -16,8 +16,12 @@
 %{
     ( _arg ) &&  ( _src = _arg);
     
+    if(_render == null) {
+      _render = false;
+    }
+    
     if(! _src) {
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for press.single-stylesheet tag");
     }
 }%
-${ press.Plugin.addSingleCSS(_src) }
+${ press.Plugin.addSingleCSS(_src, _render) }
