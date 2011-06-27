@@ -8,6 +8,8 @@
 GET      /press/js/clear         press.Press.clearJSCache
 GET      /press/js/{key}         press.Press.getCompressedJS
 GET      /press/js/single/{key}  press.Press.getSingleCompressedJS
+GET      /press/js/rendered/{<.+>file} press.Press.getRenderedJS
 GET      /press/css/clear        press.Press.clearCSSCache
 GET      /press/css/{key}        press.Press.getCompressedCSS
 GET      /press/css/single/{key} press.Press.getSingleCompressedCSS
+GET      /press/css/rendered/{<.+>file} press.Press.getRenderedCSS

@@ -9,8 +9,11 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Controller;
+import play.templates.TemplateLoader;
+import play.vfs.VirtualFile;
 import press.CSSCompressor;
 import press.CachingStrategy;
 import press.JSCompressor;
@@ -26,6 +29,22 @@ public class Press extends Controller {
         renderCompressedFile(compressedFile, "JavaScript");
     }
 
+    /**
+     * Get the uncompressed, rendered js file (for dev mode)
+     */
+    public static void getRenderedJS(String file) {
+    	VirtualFile sourceFile = Play.getVirtualFile(PluginConfig.js.srcDir + file);
+    	renderText(TemplateLoader.load(sourceFile).render());
+    }
+    
+    /**
+     * Get the uncompressed, rendered css file (for dev mode)
+     */
+    public static void getRenderdCSS(String file) {
+    	VirtualFile sourceFile = Play.getVirtualFile(PluginConfig.css.srcDir + file);
+    	renderText(TemplateLoader.load(sourceFile).render());
+    }
+    
     public static void getCompressedCSS(String key) {
         key = FileIO.unescape(key);
         CompressedFile compressedFile = CSSCompressor.getCompressedFile(key);

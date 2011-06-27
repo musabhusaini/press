@@ -51,7 +51,11 @@ public class Plugin extends PlayPlugin {
                 src = requestKey;
             }
         } else {
-            src = compressor.srcDir + fileName;
+            if(render) {
+            	src = getRenderedJSUrl(fileName);
+            } else {
+            	src = compressor.srcDir + fileName;
+            }
         }
 
         return getScriptTag(src);
@@ -72,7 +76,11 @@ public class Plugin extends PlayPlugin {
                 src = requestKey;
             }
         } else {
-            src = compressor.srcDir + fileName;
+            if(render) {
+            	src = getRenderedJSUrl(fileName);
+            } else {
+            	src = compressor.srcDir + fileName;
+            }
         }
 
         return getLinkTag(src);
@@ -92,7 +100,11 @@ public class Plugin extends PlayPlugin {
             if (performCompression()) {
                 result += compressor.add(fileName, compress, render) + "\n";
             } else {
-                result += getScriptTag(baseUrl + fileName);
+            	if (render) {
+            		result += getScriptTag(getRenderedJSUrl(fileName));
+            	} else {
+            		result += getScriptTag(baseUrl + fileName);
+            	}
             }
         }
 
@@ -113,7 +125,11 @@ public class Plugin extends PlayPlugin {
             if (performCompression()) {
                 result += compressor.add(fileName, compress, render) + "\n";
             } else {
-                result += getLinkTag(baseUrl + fileName);
+            	if (render) {
+            		result += getScriptTag(getRenderedCSSUrl(fileName));
+            	} else {
+            		result += getLinkTag(baseUrl + fileName);
+            	}
             }
         }
 
@@ -213,7 +229,19 @@ public class Plugin extends PlayPlugin {
         throw new DuplicateFileException(fileType, fileName, tagName);
     }
 
-    private static String getSingleCompressedCSSUrl(String requestKey) {
+    private static String getRenderedCSSUrl(String src) {
+	    HashMap<String, Object> args = new HashMap<String, Object>();
+	    args.put("file", src);
+	    return Router.reverse("press.Press.getRenderedCSS", args).url;
+	}
+
+	private static String getRenderedJSUrl(String src) {
+	    HashMap<String, Object> args = new HashMap<String, Object>();
+	    args.put("file", src);
+	    return Router.reverse("press.Press.getRenderedJS", args).url;
+	}
+
+	private static String getSingleCompressedCSSUrl(String requestKey) {
         return getCompressedUrl("press.Press.getSingleCompressedCSS", requestKey);
     }
 
