@@ -401,13 +401,14 @@ public abstract class Compressor extends PlayPlugin {
             throws Exception {
 
         String fileName = fileInfo.file.getName();
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
-                fileInfo.file), "UTF-8"));
+        BufferedReader in;
 
         // render the file if it should be rendered
         if (fileInfo.render) {
-        	String rendered = TemplateLoader.loadString(IOUtils.toString(in)).render();
+        	String rendered = TemplateLoader.load(VirtualFile.open(fileInfo.file)).render();
         	in = new BufferedReader(new StringReader(rendered));
+        } else {
+        	in = new BufferedReader(new InputStreamReader(new FileInputStream(fileInfo.file), "UTF-8"));
         }
         // If the file should be compressed
         if (fileInfo.compress) {
