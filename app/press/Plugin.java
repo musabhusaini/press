@@ -4,8 +4,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import play.Play;
 import play.PlayPlugin;
 import play.mvc.Router;
+import play.mvc.Router.ActionDefinition;
 import press.io.FileIO;
 import press.io.PressFileGlobber;
 
@@ -48,13 +50,13 @@ public class Plugin extends PlayPlugin {
             if (PluginConfig.isInMemoryStorage()) {
                 src = getSingleCompressedJSUrl(requestKey);
             } else {
-                src = requestKey;
+                src  = getStaticUrl(requestKey);
             }
         } else {
             if(render) {
             	src = getRenderedJSUrl(fileName);
             } else {
-            	src = compressor.srcDir + fileName;
+            	src  = getStaticUrl(compressor.srcDir + fileName);
             }
         }
 
@@ -73,13 +75,13 @@ public class Plugin extends PlayPlugin {
             if (PluginConfig.isInMemoryStorage()) {
                 src = getSingleCompressedCSSUrl(requestKey);
             } else {
-                src = requestKey;
+                src  = getStaticUrl(requestKey);
             }
         } else {
             if(render) {
             	src = getRenderedJSUrl(fileName);
             } else {
-            	src = compressor.srcDir + fileName;
+            	src  = getStaticUrl(compressor.srcDir + fileName);
             }
         }
 
@@ -103,7 +105,7 @@ public class Plugin extends PlayPlugin {
             	if (render) {
             		result += getScriptTag(getRenderedJSUrl(fileName));
             	} else {
-            		result += getScriptTag(baseUrl + fileName);
+            		result += getScriptTag(getStaticUrl(baseUrl + fileName));
             	}
             }
         }
@@ -128,7 +130,7 @@ public class Plugin extends PlayPlugin {
             	if (render) {
             		result += getScriptTag(getRenderedCSSUrl(fileName));
             	} else {
-            		result += getLinkTag(baseUrl + fileName);
+            		result += getLinkTag(getStaticUrl(baseUrl + fileName));
             	}
             }
         }
@@ -232,13 +234,13 @@ public class Plugin extends PlayPlugin {
     private static String getRenderedCSSUrl(String src) {
 	    HashMap<String, Object> args = new HashMap<String, Object>();
 	    args.put("file", src);
-	    return Router.reverse("press.Press.getRenderedCSS", args).url;
+	    return getActionUrl("press.Press.getRenderedCSS", args);
 	}
 
 	private static String getRenderedJSUrl(String src) {
 	    HashMap<String, Object> args = new HashMap<String, Object>();
 	    args.put("file", src);
-	    return Router.reverse("press.Press.getRenderedJS", args).url;
+	    return getActionUrl("press.Press.getRenderedJS", args);
 	}
 
 	private static String getSingleCompressedCSSUrl(String requestKey) {
@@ -260,7 +262,7 @@ public class Plugin extends PlayPlugin {
     private static String getCompressedUrl(String action, String requestKey) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("key", FileIO.escape(requestKey));
-        return Router.reverse(action, params).url;
+        return getActionUrl(action, params);
     }
 
     /**
@@ -281,4 +283,15 @@ public class Plugin extends PlayPlugin {
         return "<link href=\"" + src + "\" rel=\"stylesheet\" type=\"text/css\" charset=\"utf-8\">"
                 + (press.PluginConfig.htmlCompatible ? "" : "</link>") + "\n";
     }
+    
+    private static String getActionUrl(String action, Map<String, Object> args) {
+    	ActionDefinition def = Router.reverse(action, args);
+    	def.absolute();
+    	return def.url;
+    }
+    
+    private static String getStaticUrl(String url) {
+    	return Router.reverse(Play.getVirtualFile(url), true);    	
+    }
+    
 }
