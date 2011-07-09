@@ -234,13 +234,13 @@ public class Plugin extends PlayPlugin {
     private static String getRenderedCSSUrl(String src) {
 	    HashMap<String, Object> args = new HashMap<String, Object>();
 	    args.put("file", src);
-	    return getActionUrl("press.Press.getRenderedCSS", args);
+	    return Router.reverse("press.Press.getRenderedCSS", args).url;
 	}
 
 	private static String getRenderedJSUrl(String src) {
 	    HashMap<String, Object> args = new HashMap<String, Object>();
 	    args.put("file", src);
-	    return getActionUrl("press.Press.getRenderedJS", args);
+	    return Router.reverse("press.Press.getRenderedJS", args).url;
 	}
 
 	private static String getSingleCompressedCSSUrl(String requestKey) {
@@ -262,7 +262,7 @@ public class Plugin extends PlayPlugin {
     private static String getCompressedUrl(String action, String requestKey) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("key", FileIO.escape(requestKey));
-        return getActionUrl(action, params);
+        return Router.reverse(action, params).url;
     }
 
     /**
@@ -284,14 +284,11 @@ public class Plugin extends PlayPlugin {
                 + (press.PluginConfig.htmlCompatible ? "" : "</link>") + "\n";
     }
     
-    private static String getActionUrl(String action, Map<String, Object> args) {
-    	ActionDefinition def = Router.reverse(action, args);
-    	def.absolute();
-    	return def.url;
-    }
-    
+    /**
+     * Gets a URL to a static file
+     */
     private static String getStaticUrl(String url) {
-    	return Router.reverse(Play.getVirtualFile(url), true);    	
+    	return Router.reverse(Play.getVirtualFile(url));    	
     }
     
 }
