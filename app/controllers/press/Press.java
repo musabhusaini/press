@@ -95,7 +95,13 @@ public class Press extends Controller {
         // request a new version. Each version can therefore be cached indefinitely.
         if(PluginConfig.cache.equals(CachingStrategy.Change)) {
         	response.setHeader("Cache-Control", "max-age=" + 31536000); // A year
-        	response.setHeader("Expires", httpDateTimeFormatter.print(new DateTime().plusYears(1)));
+        	response.setHeader("Expires", httpDateTimeFormatter.print(new DateTime().plusYears(1)));	
+        	response.setHeader("Last-Modified", "Fri, 01 Jan 2010 00:00:00 GMT");
+        	
+        	if(request.headers.get("if-modified-since") != null) {
+        		response.status = 304;
+        		return;
+        	}
         }
         
         renderBinary(inputStream, compressedFile.name());
