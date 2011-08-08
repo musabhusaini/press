@@ -4,15 +4,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.mozilla.javascript.ErrorReporter;
-import org.mozilla.javascript.EvaluatorException;
-
 import play.Logger;
 import play.vfs.VirtualFile;
 import press.io.CompressedFile;
 import press.io.FileIO;
 
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
+import com.yahoo.platform.yui.org.mozilla.javascript.ErrorReporter;
+import com.yahoo.platform.yui.org.mozilla.javascript.EvaluatorException;
 
 public class JSCompressor extends Compressor {
     public static final String TAG_NAME = "#{press.script}";
