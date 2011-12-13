@@ -12,6 +12,7 @@ import org.joda.time.format.DateTimeFormatter;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 import press.CSSCompressor;
@@ -23,6 +24,7 @@ import press.io.FileIO;
 
 public class Press extends Controller {
 	public static final DateTimeFormatter httpDateTimeFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+	
     public static void getCompressedJS(String key) {
         key = FileIO.unescape(key);
         CompressedFile compressedFile = JSCompressor.getCompressedFile(key);
@@ -33,16 +35,51 @@ public class Press extends Controller {
      * Get the uncompressed, rendered js file (for dev mode)
      */
     public static void getRenderedJS(String file) {
-    	VirtualFile sourceFile = Play.getVirtualFile(PluginConfig.js.srcDir + file);
-    	renderText(TemplateLoader.load(sourceFile).render());
+    	serveRenderedFile(PluginConfig.js.srcDir, file, PluginConfig.js.compressedDir);
     }
     
     /**
      * Get the uncompressed, rendered css file (for dev mode)
      */
     public static void getRenderdCSS(String file) {
-    	VirtualFile sourceFile = Play.getVirtualFile(PluginConfig.css.srcDir + file);
-    	renderText(TemplateLoader.load(sourceFile).render());
+    	serveRenderedFile(PluginConfig.css.srcDir, file, PluginConfig.css.compressedDir);
+    }
+    
+    /**
+     * Serve a rendered file from a folder.
+     * If press is disabled or the file is not found, this method always returns 404.
+     * 
+     * @param baseFolder The base folder which must contain the file
+     * @param filePath The path to the file to render
+     */
+    @Util
+    public static void serveRenderedFile(String baseFolder, String filePath, String cacheDir) {
+    	if(PluginConfig.enabled) {
+    		// we only serve rendered files this way if compression is disabled
+    		notFound();
+    	}
+    	
+    	VirtualFile folder = Play.getVirtualFile(baseFolder);
+    	VirtualFile sourceFile = folder.child(filePath);
+    	
+    	// don't allow traversing out of the base folder
+    	try {
+	    	if(!sourceFile.getRealFile().getCanonicalPath().startsWith(folder.getRealFile().getCanonicalPath())) {
+	    		notFound();
+	    	}
+    	} catch (IOException ioe) {
+    		throw new UnexpectedException(ioe);
+    	}
+    	
+    	// cache the rendered file 
+    	VirtualFile destFile = Play.getVirtualFile(cacheDir).child(filePath);
+    	
+    	if(sourceFile.lastModified() > destFile.lastModified()) {
+    		destFile.getRealFile().getParentFile().mkdirs();
+    		destFile.write(TemplateLoader.load(sourceFile).render());
+    	}
+    	
+    	renderText(destFile.contentAsString());
     }
     
     public static void getCompressedCSS(String key) {
