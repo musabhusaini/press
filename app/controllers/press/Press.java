@@ -71,15 +71,7 @@ public class Press extends Controller {
     		throw new UnexpectedException(ioe);
     	}
     	
-    	// cache the rendered file 
-    	VirtualFile destFile = Play.getVirtualFile(cacheDir).child(filePath);
-    	
-    	if(sourceFile.lastModified() > destFile.lastModified()) {
-    		destFile.getRealFile().getParentFile().mkdirs();
-    		destFile.write(TemplateLoader.load(sourceFile).render());
-    	}
-    	
-    	renderText(destFile.contentAsString());
+    	renderText(TemplateLoader.load(sourceFile).render());
     }
     
     public static void getCompressedCSS(String key) {
