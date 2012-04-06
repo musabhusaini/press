@@ -71,7 +71,7 @@ public class Press extends Controller {
     		throw new UnexpectedException(ioe);
     	}
     	
-    	renderText(TemplateLoader.load(sourceFile).render());
+    	renderBinaryResponse(TemplateLoader.load(sourceFile).render());
     }
     
     public static void getCompressedCSS(String key) {
